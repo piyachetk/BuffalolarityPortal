@@ -60,7 +60,7 @@ class BuffBot extends Controller
             $res = $client->post('https://chatbot.buffalolarity.com/chatbot/conversation_start.php', $postData);
             if ($res->getStatusCode() == 200){
                 $resJson = $res->getBody();
-                $jsonDec = json_decode($resJson);
+                $jsonDec = \json_decode($resJson);
                 $bot->replyText($event->getReplyToken(), $jsonDec['botsay']);
             }
             else{
