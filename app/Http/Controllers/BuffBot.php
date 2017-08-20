@@ -22,6 +22,9 @@ class BuffBot extends Controller
         curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
         $response = curl_exec($curl);
         curl_close($curl);
+        if(curl_errno($curl)){
+            Log::info(curl_error($url));
+        }
         Log::info(var_export($response, true));
         return $response;
     }
