@@ -44,7 +44,7 @@ class BuffBot extends Controller
                 'convo_id' => $mid,
                 'say' => $replyText,
                 'format' => 'html',
-                'name' => $bot->getProfile($mid)['contacts'][0]['displayName'],
+                'name' => $bot->getProfile($mid)->getJSONDecodedBody()['contacts'][0]['displayName'],
             ];
 
             $client = new \GuzzleHttp\Client();
