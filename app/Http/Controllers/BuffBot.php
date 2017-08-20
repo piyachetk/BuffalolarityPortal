@@ -16,9 +16,6 @@ use Illuminate\Support\Facades\Log;
 class BuffBot extends Controller
 {
     protected function processMessage(Request $request){
-        Log::info(var_export($request, true));
-        Log::info(var_export($request->header(), true));
-
         $signature = $request->header('X-Line-Signature');
         if (!isset($signature) || is_null($signature)) {
             abort(400);
