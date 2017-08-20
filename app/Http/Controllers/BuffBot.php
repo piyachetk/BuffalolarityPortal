@@ -39,12 +39,21 @@ class BuffBot extends Controller
             }
             $replyText = $event->getText();
             $mid = $event->getUserId();
+            $userProfile = $bot->getProfile($mid);
+            
+            if ($userProfile->isSucceeded()) {
+                $profile = $userProfile->getJSONDecodedBody();
+                $displayName = $profile['displayName'];
+            }
+            else{
+                $displayName = 'ท่านผู้ใช้';
+            }
 
             $postData = [
                 'convo_id' => $mid,
                 'say' => $replyText,
                 'format' => 'html',
-                'name' => $bot->getProfile($mid)->getJSONDecodedBody()['contacts'][0]['displayName'],
+                'name' => $displayName
             ];
 
             $client = new \GuzzleHttp\Client();
