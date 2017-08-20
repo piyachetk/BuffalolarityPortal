@@ -22,7 +22,7 @@ class BuffBot extends Controller
         curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
         $response = curl_exec($curl);
         $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        Log::info(curl_error($url));
+        Log::info(curl_error($curl));
         Log::info($httpCode);
         Log::info(var_export($response, true));
         curl_close($curl);
