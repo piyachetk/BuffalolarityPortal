@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Log;
 class BuffBot extends Controller
 {
     protected function processMessage(Request $request){
-        $signature = LINEBot\Response::getHeader();
+        $signature = $request->header(HTTPHeader::LINE_SIGNATURE);
         if (!isset($signature) || is_null($signature)) {
             abort(400);
         }
