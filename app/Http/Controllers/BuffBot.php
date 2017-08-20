@@ -63,7 +63,9 @@ class BuffBot extends Controller
                 Log::info($resJson);
                 $jsonDec = json_decode($resJson, true);
                 */
-                $bot->replyText($event->getReplyToken(), $res->getBody()->getContents());
+                $body = $res->getBody()->getContents();
+                Log::info($body);
+                $bot->replyText($event->getReplyToken(), $body);
             }
             else{
                 $bot->replyText($event->getReplyToken(), 'BuffBot กำลังสับสน รอสักครู่');
