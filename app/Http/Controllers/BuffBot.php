@@ -21,11 +21,11 @@ class BuffBot extends Controller
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
         $response = curl_exec($curl);
-        curl_close($curl);
-        if(curl_errno($curl)){
-            Log::info(curl_error($url));
-        }
+        $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        Log::info(curl_error($url));
+        Log::info($httpCode);
         Log::info(var_export($response, true));
+        curl_close($curl);
         return $response;
     }
 
