@@ -25,7 +25,7 @@ class BuffBot extends Controller
         $bot = new LINEBot($httpClient, ['channelSecret' => '0d1623f60f2a8679726cf5d032564d11 ']);
 
         try {
-            $body = (object)$request->json()->all();
+            $body = $request->getContent();
             Log::info($body);
             $events = $bot->parseEventRequest($body, $signature[0]);
         } catch (InvalidSignatureException $e) {
