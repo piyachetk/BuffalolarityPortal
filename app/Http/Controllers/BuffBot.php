@@ -34,6 +34,8 @@ class BuffBot extends Controller
             return abort(400);
         }
 
+        Log::info(var_export($events));
+
         foreach ($events as $event) {
             if (!($event instanceof MessageEvent)) {
                 Log::info('Non message event has come');
