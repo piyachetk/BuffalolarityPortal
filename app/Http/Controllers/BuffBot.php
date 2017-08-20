@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use GuzzleHttp\Client;
 use \Illuminate\Http\Request;
 use \LINE\LINEBot;
 use \LINE\LINEBot\HTTPClient\CurlHTTPClient;
@@ -14,6 +13,17 @@ use Illuminate\Support\Facades\Log;
 
 class BuffBot extends Controller
 {
+    private function httpPost($url, $data)
+    {
+        $curl = curl_init($url);
+        curl_setopt($curl, CURLOPT_POST, true);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        $response = curl_exec($curl);
+        curl_close($curl);
+        return $response;
+    }
+
     protected function processMessage(Request $request){
         $signature = $request->header('X-Line-Signature');
         if (!isset($signature) || is_null($signature)) {
@@ -55,17 +65,11 @@ class BuffBot extends Controller
                 'name' => $displayName
             ];
 
-            $client = new Client();
-            $res = $client->post('https://chatbot.buffalolarity.com/chatbot/conversation_start.php', $postData);
-            if ($res->getStatusCode() == 200){
-                /*
-                $resJson = $res->getBody()->getContents();
-                Log::info($resJson);
-                $jsonDec = json_decode($resJson, true);
-                */
-                $body = $res->getBody()->getContents();
-                Log::info($body);
-                $bot->replyText($event->getReplyToken(), $body);
+            $res = $this->httpPost('https://chatbot.buffalolarity.com/chatbot/conversation_start.php', $postData);
+
+            if (isset($res) && !is_null($res)){
+                $jsonDec = json_decode($res, true);
+                $bot->replyText($event->getReplyToken(), $jsonDec['botsay']);
             }
             else{
                 $bot->replyText($event->getReplyToken(), 'BuffBot กำลังสับสน รอสักครู่');
