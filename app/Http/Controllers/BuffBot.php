@@ -21,6 +21,7 @@ class BuffBot extends Controller
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         $response = curl_exec($curl);
         curl_close($curl);
+        Log::info($response);
         return $response;
     }
 
