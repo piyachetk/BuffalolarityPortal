@@ -16,8 +16,8 @@ use Illuminate\Support\Facades\Log;
 class BuffBot extends Controller
 {
     protected function processMessage(Request $request){
-        $signature = $request->headers->all();
-        if (count($signature) == 0) {
+        $signature = LINEBot\Response::getHeader();
+        if (!isset($signature) || is_null($signature)) {
             abort(400);
         }
 
@@ -27,7 +27,7 @@ class BuffBot extends Controller
         try {
             $body = $request->getContent();
             Log::info($body);
-            $events = $bot->parseEventRequest($body, $signature[0]);
+            $events = $bot->parseEventRequest($body, $signature);
 
             Log::info(var_export($events));
             Log::info(count($events));
