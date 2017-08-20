@@ -40,7 +40,7 @@ class BuffBot extends Controller
             $replyText = $event->getText();
             $mid = $event->getUserId();
             $userProfile = $bot->getProfile($mid);
-            
+
             if ($userProfile->isSucceeded()) {
                 $profile = $userProfile->getJSONDecodedBody();
                 $displayName = $profile['displayName'];
@@ -60,7 +60,7 @@ class BuffBot extends Controller
             $res = $client->post('https://chatbot.buffalolarity.com/chatbot/conversation_start.php', $postData);
             if ($res->getStatusCode() == 200){
                 $resJson = $res->getBody();
-                $jsonDec = \GuzzleHttp\json_decode($resJson);
+                $jsonDec = json_decode($resJson);
                 $bot->replyText($event->getReplyToken(), $jsonDec['botsay']);
             }
             else{
