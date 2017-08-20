@@ -66,7 +66,7 @@ class BuffBot extends Controller
                 'name' => $displayName
             ];
 
-            $res = $this->httpPost('https://chatbot.buffalolarity.com/chatbot/conversation_start.php', $postData);
+            $res = $this->httpPost('/buffbot/chatbot/conversation_start.php', $postData);
 
             if (isset($res) && !is_null($res)){
                 $jsonDec = json_decode($res, true);
