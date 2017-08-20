@@ -17,7 +17,7 @@ class BuffBot extends Controller
 {
     protected function processMessage(Request $request){
         Log::info(var_export($request));
-        Log::info(var_export($request->headers()));
+        Log::info(var_export($request->header()));
 
         $signature = $request->header(HTTPHeader::LINE_SIGNATURE);
         if (!isset($signature) || is_null($signature)) {
