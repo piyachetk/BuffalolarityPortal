@@ -19,7 +19,7 @@ class BuffBot extends Controller
         Log::info(var_export($request, true));
         Log::info(var_export($request->header(), true));
 
-        $signature = $request->header(HTTPHeader::LINE_SIGNATURE);
+        $signature = $request->header('X-Line-Signature');
         if (!isset($signature) || is_null($signature)) {
             abort(400);
         }
