@@ -51,20 +51,22 @@ class BuffBot extends Controller
             $postData = [
                 'convo_id' => $mid,
                 'say' => $replyText,
-                'format' => 'json',
+                'format' => 'html',
                 'name' => $displayName
             ];
 
             $client = new Client();
             $res = $client->post('https://chatbot.buffalolarity.com/chatbot/conversation_start.php', $postData);
             if ($res->getStatusCode() == 200){
+                /*
                 $resJson = $res->getBody()->getContents();
                 Log::info($resJson);
                 $jsonDec = json_decode($resJson, true);
-                $bot->replyText($event->getReplyToken(), $jsonDec['botsay']);
+                */
+                $bot->replyText($event->getReplyToken(), $res->getBody()->getContents());
             }
             else{
-                $bot->replyText($event->getReplyToken(), $jsonDec['BuffBot กำลังสับสน รอสักครู่']);
+                $bot->replyText($event->getReplyToken(), 'BuffBot กำลังสับสน รอสักครู่');
             }
         }
 
