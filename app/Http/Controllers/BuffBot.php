@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use GuzzleHttp\Client;
 use \Illuminate\Http\Request;
 use \LINE\LINEBot;
 use \LINE\LINEBot\HTTPClient\CurlHTTPClient;
-use \LINE\LINEBot\MessageBuilder\TextMessageBuilder;
-use \LINE\LINEBot\Constant\HTTPHeader;
 use \LINE\LINEBot\Event\MessageEvent;
 use \LINE\LINEBot\Event\MessageEvent\TextMessage;
 use \LINE\LINEBot\Exception\InvalidEventRequestException;
@@ -56,11 +55,11 @@ class BuffBot extends Controller
                 'name' => $displayName
             ];
 
-            $client = new \GuzzleHttp\Client();
+            $client = new Client();
             $res = $client->post('https://chatbot.buffalolarity.com/chatbot/conversation_start.php', $postData);
             if ($res->getStatusCode() == 200){
                 $resJson = $res->getBody();
-                $jsonDec = \json_decode($resJson);
+                $jsonDec = json_decode($resJson, true);
                 $bot->replyText($event->getReplyToken(), $jsonDec['botsay']);
             }
             else{
