@@ -22,27 +22,31 @@ class BuffBot extends Controller
         }
 
         $httpClient = new CurlHTTPClient('4nACR+eddtK+qgy7r8jX779s9vwyDsa3NKttV/ZyJS4UScLBklTJ67Fn+hA+K9gkEIxftlID070cOZKVF7xDgzA1CamEXAA/AhsA0sKhJz4OWpyn8FhJFYI9RDvsaml1rd41mu0r1HvYSAoPg+wEPQdB04t89/1O/w1cDnyilFU=');
-        $bot = new LINEBot($httpClient, ['channelSecret' => '0d1623f60f2a8679726cf5d032564d11 ']);
+        $bot = new LINEBot($httpClient, ['channelSecret' => '0d1623f60f2a8679726cf5d032564d11']);
 
-        $body = $request->getContent();
-        $events = $bot->parseEventRequest($body, $signature);
+        try {
+            $body = $request->getContent();
+            $events = $bot->parseEventRequest($body, $signature);
 
-        Log::info(var_export($events, true));
-        Log::info(count($events));
-
-        foreach ($events as $event) {
-            if (!($event instanceof MessageEvent)) {
-                Log::info('Non message event has come');
-                continue;
+            foreach ($events as $event) {
+                if (!($event instanceof MessageEvent)) {
+                    Log::info('Non message event has come');
+                    continue;
+                }
+                if (!($event instanceof TextMessage)) {
+                    Log::info('Non text message has come');
+                    continue;
+                }
+                $replyText = $event->getText();
+                $resp = $bot->replyText($event->getReplyToken(), $replyText);
+                Log::info($resp->getHTTPStatus() . ': ' . $resp->getRawBody());
             }
-            if (!($event instanceof TextMessage)) {
-                Log::info('Non text message has come');
-                continue;
-            }
-            $replyText = $event->getText();
-            Log::info('Reply text: ' . $replyText);
-            $resp = $bot->replyText($event->getReplyToken(), $replyText);
-            Log::info($resp->getHTTPStatus() . ': ' . $resp->getRawBody());
+
+            return response('OK', 200);
+        } catch (InvalidSignatureException $e) {
+            return abort(400);
+        } catch (InvalidEventRequestException $e) {
+            return abort(400);
         }
     }
 }
