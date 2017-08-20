@@ -16,15 +16,15 @@ use Illuminate\Support\Facades\Log;
 class BuffBot extends Controller
 {
     protected function processMessage(Request $request){
-        Log::info(var_export($request));
-        Log::info(var_export($request->header()));
+        Log::info(var_export($request, true));
+        Log::info(var_export($request->header(), true));
 
         $signature = $request->header(HTTPHeader::LINE_SIGNATURE);
         if (!isset($signature) || is_null($signature)) {
             abort(400);
         }
 
-        Log::info(var_export($signature));
+        Log::info(var_export($signature, true));
 
         $httpClient = new CurlHTTPClient('4nACR+eddtK+qgy7r8jX779s9vwyDsa3NKttV/ZyJS4UScLBklTJ67Fn+hA+K9gkEIxftlID070cOZKVF7xDgzA1CamEXAA/AhsA0sKhJz4OWpyn8FhJFYI9RDvsaml1rd41mu0r1HvYSAoPg+wEPQdB04t89/1O/w1cDnyilFU=');
         $bot = new LINEBot($httpClient, ['channelSecret' => '0d1623f60f2a8679726cf5d032564d11 ']);
@@ -34,7 +34,7 @@ class BuffBot extends Controller
             Log::info($body);
             $events = $bot->parseEventRequest($body, $signature);
 
-            Log::info(var_export($events));
+            Log::info(var_export($events, true));
             Log::info(count($events));
 
             foreach ($events as $event) {
