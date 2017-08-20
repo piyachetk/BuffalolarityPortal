@@ -25,28 +25,22 @@ class BuffBot extends Controller
         $bot = new LINEBot($httpClient, ['channelSecret' => '0d1623f60f2a8679726cf5d032564d11']);
 
         try {
-            $body = $request->getContent();
-            $events = $bot->parseEventRequest($body, $signature);
-
-            foreach ($events as $event) {
-                if (!($event instanceof MessageEvent)) {
-                    Log::info('Non message event has come');
-                    continue;
-                }
-                if (!($event instanceof TextMessage)) {
-                    Log::info('Non text message has come');
-                    continue;
-                }
-                $replyText = $event->getText();
-                $resp = $bot->replyText($event->getReplyToken(), $replyText);
-                Log::info($resp->getHTTPStatus() . ': ' . $resp->getRawBody());
-            }
-
-            return response('OK', 200);
+            $events = $bot->parseEventRequest($request->getContent(), $signature);
         } catch (InvalidSignatureException $e) {
             return abort(400);
         } catch (InvalidEventRequestException $e) {
             return abort(400);
         }
+
+        foreach ($events as $event) {
+            if (!($event instanceof MessageEvent) || !($event instanceof TextMessage)) {
+                $bot->replyText($event->getReplyToken(), "มีคีย์บอร์ดก็พิมตัวหนังสือสิครับ ส่งเชี่ยอะไรมาเนี่ย");
+                continue;
+            }
+            $replyText = $event->getText();
+            $bot->replyText($event->getReplyToken(), $replyText);
+        }
+
+        return response('OK', 200);
     }
 }
