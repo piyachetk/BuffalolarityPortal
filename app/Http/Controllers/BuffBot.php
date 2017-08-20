@@ -28,28 +28,30 @@ class BuffBot extends Controller
             $body = $request->getContent();
             Log::info($body);
             $events = $bot->parseEventRequest($body, $signature[0]);
+
+            Log::info(var_export($events));
+            Log::info(count($events));
+
+            foreach ($events as $event) {
+                if (!($event instanceof MessageEvent)) {
+                    Log::info('Non message event has come');
+                    continue;
+                }
+                if (!($event instanceof TextMessage)) {
+                    Log::info('Non text message has come');
+                    continue;
+                }
+                $replyText = $event->getText();
+                Log::info('Reply text: ' . $replyText);
+                $resp = $bot->replyText($event->getReplyToken(), $replyText);
+                Log::info($resp->getHTTPStatus() . ': ' . $resp->getRawBody());
+            }
+
+            return response('OK', 200);
         } catch (InvalidSignatureException $e) {
             return abort(400);
         } catch (InvalidEventRequestException $e) {
             return abort(400);
         }
-
-        Log::info(var_export($events));
-
-        foreach ($events as $event) {
-            if (!($event instanceof MessageEvent)) {
-                Log::info('Non message event has come');
-                continue;
-            }
-            if (!($event instanceof TextMessage)) {
-                Log::info('Non text message has come');
-                continue;
-            }
-            $replyText = $event->getText();
-            Log::info('Reply text: ' . $replyText);
-            $resp = $bot->replyText($event->getReplyToken(), $replyText);
-            Log::info($resp->getHTTPStatus() . ': ' . $resp->getRawBody());
-        }
-        return response('OK', 200);
     }
 }
