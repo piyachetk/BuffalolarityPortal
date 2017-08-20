@@ -1,0 +1,16 @@
+@font-face
+{
+    font-family:'THSarabunNew';
+    src:url('thsarabunnew-webfont.eot');
+    src:url('thsarabunnew-webfont.eot?#iefix') format('embedded-opentype'),
+    url('thsarabunnew-webfont.woff') format('woff'),
+    url('thsarabunnew-webfont.ttf') format('truetype');
+    font-weight:normal;
+    font-style:normal
+}
+body{
+    font-family:'THSarabunNew', Sans-Serif
+}
+.text{
+    font-family:'THSarabunNew';
+}
