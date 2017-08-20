@@ -16,8 +16,8 @@ use Illuminate\Support\Facades\Log;
 class BuffBot extends Controller
 {
     protected function processMessage(Request $request){
-        $signature = $request->header(HTTPHeader::LINE_SIGNATURE);
-        if (empty($signature)) {
+        $signature = $request->headers->all();
+        if (count($signature) == 0) {
             abort(400);
         }
 
