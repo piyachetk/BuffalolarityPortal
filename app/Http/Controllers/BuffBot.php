@@ -51,7 +51,7 @@ class BuffBot extends Controller
             $postData = [
                 'convo_id' => $mid,
                 'say' => $replyText,
-                'format' => 'html',
+                'format' => 'json',
                 'name' => $displayName
             ];
 
