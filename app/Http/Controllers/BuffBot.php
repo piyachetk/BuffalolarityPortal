@@ -25,7 +25,6 @@ class BuffBot extends Controller
         $context  = stream_context_create($options);
         $result = file_get_contents($url, false, $context);
 
-
         Log::info($result);
         return $result;
     }
@@ -73,12 +72,12 @@ class BuffBot extends Controller
 
             $res = $this->httpPost('https://chatbot.buffalolarity.com/chatbot/conversation_start.php', $postData);
 
-            if (isset($res) && !is_null($res)){
+            if (isset($res) && !is_null($res) || $res == 'No AIML category found. This is a Default Response.'){
                 $jsonDec = json_decode($res, true);
                 $bot->replyText($event->getReplyToken(), $jsonDec['botsay']);
             }
             else{
-                $bot->replyText($event->getReplyToken(), 'BuffBot กำลังสับสน รอสักครู่');
+                $bot->replyText($event->getReplyToken(), 'BuffBot สับสนครับ');
             }
         }
 
