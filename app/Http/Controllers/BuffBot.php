@@ -18,9 +18,8 @@ class BuffBot extends Controller
         $client = new \GuzzleHttp\Client();
 
         $response = $client->request(
-            'POST',
-            $url,
-            $data
+            'GET',
+            $url.http_build_query($data)
         );
 
         $body = $response->getBody();
