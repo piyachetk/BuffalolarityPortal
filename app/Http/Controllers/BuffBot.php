@@ -15,16 +15,19 @@ class BuffBot extends Controller
 {
     private function httpPost($url, $data)
     {
-        $client = new \GuzzleHttp\Client();
-
-        $response = $client->request(
-            'GET',
-            $url.http_build_query($data)
+        $options = array(
+            'http' => array(
+                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                'method'  => 'POST',
+                'content' => http_build_query($data)
+            )
         );
+        $context  = stream_context_create($options);
+        $result = file_get_contents($url, false, $context);
 
-        $body = $response->getBody();
-        Log::info($body);
-        return $body;
+
+        Log::info($result);
+        return $result;
     }
 
     protected function processMessage(Request $request){
