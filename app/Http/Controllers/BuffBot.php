@@ -15,18 +15,17 @@ class BuffBot extends Controller
 {
     private function httpPost($url, $data)
     {
-        $curl = curl_init($url);
-        curl_setopt($curl, CURLOPT_POST, true);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-        $response = curl_exec($curl);
-        $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        Log::info(curl_error($curl));
-        Log::info($httpCode);
-        Log::info(var_export($response, true));
-        curl_close($curl);
-        return $response;
+        $client = new \GuzzleHttp\Client();
+
+        $response = $client->request(
+            'POST',
+            $url,
+            $data
+        );
+
+        $body = $response->getBody();
+        Log::info($body);
+        return $body;
     }
 
     protected function processMessage(Request $request){
