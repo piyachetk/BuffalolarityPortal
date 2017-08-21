@@ -75,7 +75,7 @@ class BuffBot extends Controller
             if (isset($res) && !is_null($res)){
                 $jsonDec = json_decode($res, true);
                 $botsay = $jsonDec['botsay'];
-                if ($botsay == 'No AIML category found. This is a Default Response.'){
+                if ($botsay != 'No AIML category found. This is a Default Response.'){
                     $bot->replyText($event->getReplyToken(), $botsay);
                 }
                 else{
