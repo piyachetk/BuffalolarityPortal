@@ -72,9 +72,15 @@ class BuffBot extends Controller
 
             $res = $this->httpPost('https://chatbot.buffalolarity.com/chatbot/conversation_start.php', $postData);
 
-            if (isset($res) && !is_null($res) || $res == 'No AIML category found. This is a Default Response.'){
+            if (isset($res) && !is_null($res)){
                 $jsonDec = json_decode($res, true);
-                $bot->replyText($event->getReplyToken(), $jsonDec['botsay']);
+                $botsay = $jsonDec['botsay'];
+                if ($botsay == 'No AIML category found. This is a Default Response.'){
+                    $bot->replyText($event->getReplyToken(), $botsay);
+                }
+                else{
+                    $bot->replyText($event->getReplyToken(), 'BuffBot สับสนครับ');
+                }
             }
             else{
                 $bot->replyText($event->getReplyToken(), 'BuffBot สับสนครับ');
