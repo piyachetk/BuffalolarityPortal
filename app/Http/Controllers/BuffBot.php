@@ -102,7 +102,7 @@ class BuffBot extends Controller
 
                 $command = substr($replyText, 9);
 
-                if (strpos($command, 'ขอรูปล่าสุดในไอจีของ') === 0)
+                if (strpos($command, 'ขอรูปล่าสุดในไอจีของ') === 0 || strpos($command, 'ขอภาพล่าสุดในไอจีของ') === 0)
                 {
                     $name = trim(substr($command, strlen('ขอรูปล่าสุดในไอจีของ')));
 
