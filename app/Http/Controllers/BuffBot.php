@@ -106,8 +106,11 @@ class BuffBot extends Controller
                     $bot->replyMessage($event->getReplyToken(), $imageMessageBuilder);
                 }
                 else{
-                    $bot->replyText($event->getReplyToken(), 'BuffBot สับสนครับ ' . $displayName . ' ตอนนี้ BuffBot เป็นแค่รุ่น Prototype นะครับ สามารถขอได้แค่รูปล่าสุดในไอจีครับ');
+                    $bot->replyText($event->getReplyToken(), 'ตอนนี้ BuffBot เป็นแค่รุ่น Prototype นะครับ สามารถขอได้แค่รูปล่าสุดในไอจีครับ ' . $displayName);
                 }
+            }
+            else{
+                $bot->replyText($event->getReplyToken(), 'BuffBot สับสนครับ');
             }
         }
 
