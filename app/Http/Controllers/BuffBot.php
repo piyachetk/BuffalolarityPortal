@@ -20,8 +20,8 @@ class BuffBot extends Controller
         'โมบาย' => 'mobile',
         'โมไบ' => 'mobile',
         'โม' => 'mobile',
-        'เณอปราง' => 'cherprang',
-        'เณอ' => 'cherprang',
+        'เฌอปราง' => 'cherprang',
+        'เฌอ' => 'cherprang',
         'มายด์' => 'mind',
         'มาย' => 'mind'
     ];
@@ -110,7 +110,7 @@ class BuffBot extends Controller
                 }
             }
             else{
-                $bot->replyText($event->getReplyToken(), 'BuffBot สับสนครับ');
+                //$bot->replyText($event->getReplyToken(), 'BuffBot สับสนครับ');
             }
         }
 
