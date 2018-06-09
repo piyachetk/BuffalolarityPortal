@@ -85,7 +85,7 @@ class BuffBot extends Controller
 
                 if (strpos($command, 'ขอรูปล่าสุดในไอจีของ') === 0)
                 {
-                    $name = trim(substr($command, 20));
+                    $name = trim(substr($command, strlen('ขอรูปล่าสุดในไอจีของ')));
 
                     $id = $this->getBNKInstagramIdFromName($name);
 
