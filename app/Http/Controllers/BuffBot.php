@@ -105,9 +105,17 @@ class BuffBot extends Controller
 
                     $bot->replyMessage($event->getReplyToken(), $imageMessageBuilder);
                 }
+                else if($command === 'ใครสร้างนายขึ้นมา')
+                {
+                    $bot->replyText($event->getReplyToken(),'ท่านฮ่องเต้ครับ\nTwitter: piyachetkk\nWebsite: https://www.buffalolarity.com/');
+                }
                 else{
                     $bot->replyText($event->getReplyToken(), 'ตอนนี้ BuffBot เป็นแค่รุ่น Prototype นะครับ สามารถขอได้แค่รูปล่าสุดในไอจีครับ ' . $displayName);
                 }
+            }
+            else if($replyText === 'BuffBot!')
+            {
+                $bot->replyText($event->getReplyToken(), 'ครับผม BuffBot ยินดีรับใช้ครับ');
             }
             else{
                 //$bot->replyText($event->getReplyToken(), 'BuffBot สับสนครับ');
