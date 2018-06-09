@@ -10,9 +10,22 @@ use \LINE\LINEBot\Event\MessageEvent\TextMessage;
 use \LINE\LINEBot\Exception\InvalidEventRequestException;
 use \LINE\LINEBot\Exception\InvalidSignatureException;
 use Illuminate\Support\Facades\Log;
+use \InstagramScraper\Instagram;
 
 class BuffBot extends Controller
 {
+    public static $ids = [
+        'โมบายล์' => 'mobile',
+        'โมไบล์' => 'mobile',
+        'โมบาย' => 'mobile',
+        'โมไบ' => 'mobile',
+        'โม' => 'mobile',
+        'เณอปราง' => 'cherprang',
+        'เณอ' => 'cherprang',
+        'มายด์' => 'mind',
+        'มาย' => 'mind'
+    ];
+
     private function httpPost($url, $data)
     {
         $options = array(
@@ -47,46 +60,92 @@ class BuffBot extends Controller
         }
 
         foreach ($events as $event) {
+
             if (!($event instanceof MessageEvent) || !($event instanceof TextMessage)) {
-                $bot->replyText($event->getReplyToken(), "มีคีย์บอร์ดก็พิมตัวหนังสือสิครับ ส่งเชี่ยอะไรมาเนี่ย");
+                //$bot->replyText($event->getReplyToken(), "มีคีย์บอร์ดก็พิมตัวหนังสือสิครับ ส่งเชี่ยอะไรมาเนี่ย");
                 continue;
             }
+
             $replyText = $event->getText();
-            $mid = $event->getUserId();
-            $userProfile = $bot->getProfile($mid);
 
-            if ($userProfile->isSucceeded()) {
-                $profile = $userProfile->getJSONDecodedBody();
-                $displayName = $profile['displayName'];
-            }
-            else{
-                $displayName = 'ท่านผู้ใช้';
-            }
+            if (substr($replyText,0,9) === "BuffBot! ")
+            {
+                $id = $event->getUserId();
+                $userProfile = $bot->getProfile($id);
 
-            $postData = [
-                'convo_id' => $mid,
-                'say' => $replyText,
-                'format' => 'json',
-                'name' => $displayName
-            ];
-
-            $res = $this->httpPost('https://chatbot.buffalolarity.com/chatbot/conversation_start.php', $postData);
-
-            if (isset($res) && !is_null($res)){
-                $jsonDec = json_decode($res, true);
-                $botsay = $jsonDec['botsay'];
-                if ($botsay != 'No AIML category found. This is a Default Response.'){
-                    $bot->replyText($event->getReplyToken(), $botsay);
+                if ($userProfile->isSucceeded()) {
+                    $profile = $userProfile->getJSONDecodedBody();
+                    $displayName = $profile['displayName'];
                 }
                 else{
-                    $bot->replyText($event->getReplyToken(), 'BuffBot สับสนครับ');
+                    $displayName = 'ท่านผู้ใช้';
                 }
-            }
-            else{
-                $bot->replyText($event->getReplyToken(), 'BuffBot สับสนครับ');
+
+                $command = substr($replyText, 9);
+
+                if (substr($command, 0, '20') === 'ขอรูปล่าสุดในไอจีของ')
+                {
+                    $name = trim(substr($command, 20));
+
+                    $id = $this->getBNKInstagramIdFromName($name);
+
+                    if ($id == '')
+                    {
+                        $id = $name;
+                    }
+
+                    $imageLink = $this->getLatestInstagramPhoto($id);
+
+                    if (is_null($imageLink))
+                    {
+                        $bot->replyText($event->getReplyToken(), 'BuffBot ไม่สามารถหารูปล่าสุดได้ครับ');
+                    }
+
+                    $imageMessageBuilder = new \LINE\LINEBot\MessageBuilder\ImageMessageBuilder($imageLink, $imageLink);
+
+                    $bot->replyMessage($event->getReplyToken(), $imageMessageBuilder);
+                }
+                else{
+                    $bot->replyText($event->getReplyToken(), 'BuffBot สับสนครับ ' . $displayName . ' ตอนนี้ BuffBot เป็นแค่รุ่น Prototype นะครับ สามารถขอได้แค่รูปล่าสุดในไอจีครับ');
+                }
             }
         }
 
         return response('OK', 200);
+    }
+
+    public function getLatestInstagramPhoto($id)
+    {
+        try {
+            $instagram = new Instagram();
+            $medias = $instagram->getMedias($id, 10);
+
+            foreach ($medias as $media) {
+                if ($media->getType() != "image") {
+                    continue;
+                }
+
+                return $media->getImageHighResolutionUrl();
+            }
+        }
+        catch(\Exception $exception)
+        {
+            //
+        }
+
+        return null;
+    }
+
+    private function getBNKInstagramIdFromName($name)
+    {
+        foreach(self::$ids as $key => $value)
+        {
+            if ($name == $key)
+            {
+                return $value . '.bnk48official';
+            }
+        }
+
+        return '';
     }
 }

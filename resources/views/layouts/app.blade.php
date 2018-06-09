@@ -63,7 +63,7 @@
         <a href="mailto:buffalolarity.th@gmail.com">
             <img class="externalLinkImg" src="/img/mail.png" />
         </a>
-        <a href="https://www.buftaku.cf/">
+        <a href="https://buftaku.buffalolarity.com/">
             <img class="externalLinkImg" src="/img/buftaku_logo_round.png" />
         </a>
         <a href="https://www.facebook.com/buffalolarity">
