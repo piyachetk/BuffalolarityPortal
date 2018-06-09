@@ -68,7 +68,7 @@ class BuffBot extends Controller
 
             $replyText = $event->getText();
 
-            if (substr($replyText,0,9) === "BuffBot! ")
+            if (strpos($replyText, 'BuffBot! ') === 0)
             {
                 $id = $event->getUserId();
                 $userProfile = $bot->getProfile($id);
@@ -83,7 +83,7 @@ class BuffBot extends Controller
 
                 $command = substr($replyText, 9);
 
-                if (substr($command, 0, 20) === 'ขอรูปล่าสุดในไอจีของ')
+                if (strpos($command, 'ขอรูปล่าสุดในไอจีของ') === 0)
                 {
                     $name = trim(substr($command, 20));
 
