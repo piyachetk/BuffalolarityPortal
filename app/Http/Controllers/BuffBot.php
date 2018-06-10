@@ -179,23 +179,22 @@ class BuffBot extends Controller
                     continue;
                 }
 
-                if ($media->getType() == 'sidecar')
+                $highRes = $media->getImageHighResolutionUrl();
+                $stdRes = $media->getImageStandardResolutionUrl();
+                $lowRes = $media->getImageLowResolutionUrl();
+
+                if (!empty($highRes) && !is_null($highRes))
                 {
-                    $subItems = $media->getSidecarMedias();
-
-                    foreach($subItems as $subItem)
-                    {
-                        if ($subItem->getType() != 'image' && $subItem->getType() != 'sidecar') {
-                            continue;
-                        }
-
-                        return $subItem->getImageHighResolutionUrl();
-                    }
-
-                    continue;
+                    return $highRes;
                 }
-
-                return $media->getImageHighResolutionUrl();
+                else if (!empty($stdRes) && !is_null($stdRes))
+                {
+                    return $stdRes;
+                }
+                else if (!empty($lowRes) && !is_null($lowRes))
+                {
+                    return $lowRes;
+                }
             }
         }
         catch(\Exception $exception)
@@ -217,22 +216,11 @@ class BuffBot extends Controller
                     continue;
                 }
 
-                $standardRes = $media->getVideoStandardResolutionUrl();
-                $lowRes = $media->getVideoLowResolutionUrl();
-                $lowBandwidth = $media->getVideoLowBandwidthUrl();
+                $link = $media->getLink();
+                $json_media_by_url = $instagram->getMediaByUrl($link);
+                $video_url = $json_media_by_url['videoStandardResolutionUrl'];
 
-                if (!empty($standardRes) && !is_null($standardRes))
-                {
-                    return $standardRes;
-                }
-                else if (!empty($lowRes) && !is_null($lowRes))
-                {
-                    return $lowRes;
-                }
-                else if (!empty($lowBandwidth) && !is_null($lowBandwidth))
-                {
-                    return $lowBandwidth;
-                }
+                return $video_url;
             }
         }
         catch(\Exception $exception)
