@@ -17,37 +17,6 @@ use LINE\LINEBot\MessageBuilder\VideoMessageBuilder;
 
 class BuffBot extends Controller
 {
-    public static $ids = [
-        'โมบายล์' => 'mobile',
-        'โมไบล์' => 'mobile',
-        'โมบาย' => 'mobile',
-        'โม' => 'mobile',
-        'เฌอปราง' => 'cherprang',
-        'เฌอ' => 'cherprang',
-        'มายด์' => 'mind',
-        'มาย' => 'mind',
-        'มิโอริ' => 'miori',
-        'อร' => 'orn',
-        'อรอุ๋ง' => 'orn',
-        'อุ๋ง' => 'orn',
-        'ก่อน' => 'korn',
-        'ลุงก่อน' => 'korn',
-        'คุณไข่' => 'kaimook',
-        'ไข่มุก' => 'kaimook',
-        'ปูเป้' => 'pupe',
-        'ปู้ป' => 'pupe',
-        'ปู๊ป' => 'pupe',
-        'บอส' => 'pupe',
-        'มิวสิค' => 'music',
-        'คุณพระอาทิตย์' => 'music',
-        'คุณหมีลิน' => 'namneung',
-        'น้ำหนึ่ง' => 'namneung',
-        'คุณหมี' => 'namneung',
-        'เขียว' => 'kaew',
-        'แก้ว' => 'kaew',
-        'ครูแก้ว' => 'kaew',
-    ];
-
     protected function processMessage(Request $request){
         $signature = $request->header('X-Line-Signature');
         if (!isset($signature) || is_null($signature)) {
