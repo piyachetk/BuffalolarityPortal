@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use \App\Alias;
 use \Illuminate\Http\Request;
 use \LINE\LINEBot;
 use \LINE\LINEBot\HTTPClient\CurlHTTPClient;
@@ -47,22 +48,6 @@ class BuffBot extends Controller
         'ครูแก้ว' => 'kaew',
     ];
 
-    private function httpPost($url, $data)
-    {
-        $options = array(
-            'http' => array(
-                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                'method'  => 'POST',
-                'content' => http_build_query($data)
-            )
-        );
-        $context  = stream_context_create($options);
-        $result = file_get_contents($url, false, $context);
-
-        Log::info($result);
-        return $result;
-    }
-
     protected function processMessage(Request $request){
         $signature = $request->header('X-Line-Signature');
         if (!isset($signature) || is_null($signature)) {
@@ -87,6 +72,8 @@ class BuffBot extends Controller
                 continue;
             }
 
+            $isGroup = $event->isGroupEvent();
+
             $replyText = $event->getText();
 
             if (strpos($replyText, 'BuffBot! ') === 0)
@@ -108,7 +95,7 @@ class BuffBot extends Controller
                 {
                     $name = trim(substr($command, strlen('ขอรูปล่าสุดในไอจีของ')));
 
-                    $id = $this->getBNKInstagramIdFromName($name);
+                    $id = $this->getInstagramIdFromAlias($name);
 
                     if ($id == '')
                     {
@@ -130,7 +117,7 @@ class BuffBot extends Controller
                 {
                     $name = trim(substr($command, strlen('ขอวีดีโอล่าสุดในไอจีของ')));
 
-                    $id = $this->getBNKInstagramIdFromName($name);
+                    $id = $this->getInstagramIdFromAlias($name);
 
                     if ($id == '')
                     {
@@ -150,9 +137,9 @@ class BuffBot extends Controller
 
                     $bot->replyMessage($event->getReplyToken(), $videoMessageBuilder);
                 }
-                else if ($this->startsWith($command, 'เซฟรูปในไอจีจากลิงค์'))
+                else if ($this->startsWith($command, 'ขอรูปในไอจีจากลิงค์') || $this->startsWith($command, 'ขอภาพในไอจีจากลิงค์'))
                 {
-                    $link = trim(substr($command, strlen('เซฟรูปในไอจีจากลิงค์')));
+                    $link = trim(substr($command, strlen('ขอรูปในไอจีจากลิงค์')));
 
                     $imageLink = $this->getInstagramImageViaLink($link);
 
@@ -165,9 +152,9 @@ class BuffBot extends Controller
 
                     $bot->replyMessage($event->getReplyToken(), $imageMessageBuilder);
                 }
-                else if ($this->startsWith($command, 'เซฟวีดีโอในไอจีจากลิงค์'))
+                else if ($this->startsWith($command, 'ขอวีดีโอในไอจีจากลิงค์'))
                 {
-                    $link = trim(substr($command, strlen('เซฟวีดีโอในไอจีจากลิงค์')));
+                    $link = trim(substr($command, strlen('ขอวีดีโอในไอจีจากลิงค์')));
 
                     $preview = null;
 
@@ -187,15 +174,16 @@ class BuffBot extends Controller
                     $bot->replyText($event->getReplyToken(),"ท่านฮ่องเต้ครับ\nTwitter: piyachetkk\nWebsite: https://www.buffalolarity.com/");
                 }
                 else{
-                    $bot->replyText($event->getReplyToken(), 'ตอนนี้ BuffBot เป็นแค่รุ่น Prototype นะครับ สามารถขอได้แค่รูปล่าสุดในไอจีครับ ' . $displayName);
+                    $bot->replyText($event->getReplyToken(), "BuffBot สับสนครับ" . $displayName);
                 }
             }
             else if($replyText === 'BuffBot!')
             {
                 $bot->replyText($event->getReplyToken(), 'ครับผม BuffBot ยินดีรับใช้ครับ');
             }
-            else{
-                //$bot->replyText($event->getReplyToken(), 'BuffBot สับสนครับ');
+            else if ($isGroup)
+            {
+                $bot->replyText($event->getReplyToken(), 'BuffBot สับสนครับ');
             }
         }
 
@@ -348,13 +336,13 @@ class BuffBot extends Controller
         return strpos($command, $match) === 0;
     }
 
-    public function getBNKInstagramIdFromName($name)
+    public function getInstagramIdFromAlias($name)
     {
-        foreach(self::$ids as $key => $value)
+        foreach(Alias::all() as $alias)
         {
-            if ($name == $key)
+            if ($alias->alias == $name)
             {
-                return $value . '.bnk48official';
+                return $alias->id;
             }
         }
 
