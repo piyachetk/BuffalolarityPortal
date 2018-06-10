@@ -150,6 +150,38 @@ class BuffBot extends Controller
 
                     $bot->replyMessage($event->getReplyToken(), $videoMessageBuilder);
                 }
+                else if ($this->startsWith($command, 'เซฟรูปในไอจีจากลิงค์'))
+                {
+                    $link = trim(substr($command, strlen('เซฟรูปในไอจีจากลิงค์')));
+
+                    $imageLink = $this->getInstagramImageViaLink($link);
+
+                    if (is_null($imageLink) || empty($imageLink))
+                    {
+                        $bot->replyText($event->getReplyToken(), 'BuffBot ไม่สามารถหารูปจากลิงค์ได้ครับ');
+                    }
+
+                    $imageMessageBuilder = new ImageMessageBuilder($imageLink, $imageLink);
+
+                    $bot->replyMessage($event->getReplyToken(), $imageMessageBuilder);
+                }
+                else if ($this->startsWith($command, 'เซฟวีดีโอในไอจีจากลิงค์'))
+                {
+                    $link = trim(substr($command, strlen('เซฟวีดีโอในไอจีจากลิงค์')));
+
+                    $preview = null;
+
+                    $videoLink = $this->getInstagramVideoViaLink($link, $preview);
+
+                    if (is_null($videoLink) || empty($videoLink))
+                    {
+                        $bot->replyText($event->getReplyToken(), 'BuffBot ไม่สามารถหาวีดีโอจากลิงค์ได้ครับ');
+                    }
+
+                    $videoMessageBuilder = new VideoMessageBuilder($videoLink, $preview ?: '');
+
+                    $bot->replyMessage($event->getReplyToken(), $videoMessageBuilder);
+                }
                 else if($this->startsWith($command, 'ใครสร้างนายขึ้นมา'))
                 {
                     $bot->replyText($event->getReplyToken(),"ท่านฮ่องเต้ครับ\nTwitter: piyachetkk\nWebsite: https://www.buffalolarity.com/");
@@ -238,6 +270,69 @@ class BuffBot extends Controller
                 {
                     return $lowRes;
                 }
+            }
+        }
+        catch(\Exception $exception)
+        {
+            //
+        }
+
+        return null;
+    }
+
+    public function getInstagramImageViaLink($link)
+    {
+        try {
+            $instagram = new Instagram();
+            $json_media_by_url = $instagram->getMediaByUrl($link);
+
+            $highRes = $json_media_by_url['imageHighResolutionUrl'];
+            $stdRes = $json_media_by_url['imageStandardResolutionUrl'];
+            $lowRes = $json_media_by_url['imageLowResolutionUrl'];
+
+            if (!empty($highRes) && !is_null($highRes))
+            {
+                return $highRes;
+            }
+            else if (!empty($stdRes) && !is_null($stdRes))
+            {
+                return $stdRes;
+            }
+            else if (!empty($lowRes) && !is_null($lowRes))
+            {
+                return $lowRes;
+            }
+        }
+        catch(\Exception $exception)
+        {
+            //
+        }
+
+        return null;
+    }
+
+    public function getInstagramVideoViaLink($link, &$preview)
+    {
+        try {
+            $instagram = new Instagram();
+            $json_media_by_url = $instagram->getMediaByUrl($link);
+            $highRes = $json_media_by_url['videoStandardResolutionUrl'];
+            $stdRes = $json_media_by_url['videoLowResolutionUrl'];
+            $lowRes = $json_media_by_url['videoLowBandwidthUrl'];
+
+            $preview = $json_media_by_url['imageHighResolutionUrl'];
+
+            if (!empty($highRes) && !is_null($highRes))
+            {
+                return $highRes;
+            }
+            else if (!empty($stdRes) && !is_null($stdRes))
+            {
+                return $stdRes;
+            }
+            else if (!empty($lowRes) && !is_null($lowRes))
+            {
+                return $lowRes;
             }
         }
         catch(\Exception $exception)
