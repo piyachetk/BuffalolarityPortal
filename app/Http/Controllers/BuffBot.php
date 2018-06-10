@@ -117,7 +117,7 @@ class BuffBot extends Controller
 
                     $imageLink = $this->getLatestInstagramImage($id);
 
-                    if (is_null($imageLink))
+                    if (is_null($imageLink) || empty($imageLink))
                     {
                         $bot->replyText($event->getReplyToken(), 'BuffBot ไม่สามารถหารูปล่าสุดได้ครับ');
                     }
@@ -139,7 +139,7 @@ class BuffBot extends Controller
 
                     $videoLink = $this->getLatestInstagramVideo($id);
 
-                    if (is_null($videoLink))
+                    if (is_null($videoLink) || empty($videoLink))
                     {
                         $bot->replyText($event->getReplyToken(), 'BuffBot ไม่สามารถหาวีดีโอล่าสุดได้ครับ');
                     }
