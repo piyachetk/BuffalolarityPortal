@@ -11,6 +11,8 @@ use \LINE\LINEBot\Exception\InvalidEventRequestException;
 use \LINE\LINEBot\Exception\InvalidSignatureException;
 use Illuminate\Support\Facades\Log;
 use \InstagramScraper\Instagram;
+use LINE\LINEBot\MessageBuilder\ImageMessageBuilder;
+use LINE\LINEBot\MessageBuilder\VideoMessageBuilder;
 
 class BuffBot extends Controller
 {
@@ -102,7 +104,7 @@ class BuffBot extends Controller
 
                 $command = substr($replyText, 9);
 
-                if (strpos($command, 'ขอรูปล่าสุดในไอจีของ') === 0 || strpos($command, 'ขอภาพล่าสุดในไอจีของ') === 0)
+                if ($this->startsWith($command, 'ขอรูปล่าสุดในไอจีของ') || $this->startsWith($command, 'ขอภาพล่าสุดในไอจีของ'))
                 {
                     $name = trim(substr($command, strlen('ขอรูปล่าสุดในไอจีของ')));
 
@@ -113,18 +115,40 @@ class BuffBot extends Controller
                         $id = $name;
                     }
 
-                    $imageLink = $this->getLatestInstagramPhoto($id);
+                    $imageLink = $this->getLatestInstagramImage($id);
 
                     if (is_null($imageLink))
                     {
                         $bot->replyText($event->getReplyToken(), 'BuffBot ไม่สามารถหารูปล่าสุดได้ครับ');
                     }
 
-                    $imageMessageBuilder = new \LINE\LINEBot\MessageBuilder\ImageMessageBuilder($imageLink, $imageLink);
+                    $imageMessageBuilder = new ImageMessageBuilder($imageLink, $imageLink);
 
                     $bot->replyMessage($event->getReplyToken(), $imageMessageBuilder);
                 }
-                else if($command === 'ใครสร้างนายขึ้นมา')
+                else if ($this->startsWith($command, 'ขอวีดีโอล่าสุดในไอจีของ'))
+                {
+                    $name = trim(substr($command, strlen('ขอวีดีโอล่าสุดในไอจีของ')));
+
+                    $id = $this->getBNKInstagramIdFromName($name);
+
+                    if ($id == '')
+                    {
+                        $id = $name;
+                    }
+
+                    $videoLink = $this->getLatestInstagramVideo($id);
+
+                    if (is_null($videoLink))
+                    {
+                        $bot->replyText($event->getReplyToken(), 'BuffBot ไม่สามารถหาวีดีโอล่าสุดได้ครับ');
+                    }
+
+                    $videoMessageBuilder = new VideoMessageBuilder($videoLink, '');
+
+                    $bot->replyMessage($event->getReplyToken(), $videoMessageBuilder);
+                }
+                else if($this->startsWith($command, 'ใครสร้างนายขึ้นมา'))
                 {
                     $bot->replyText($event->getReplyToken(),"ท่านฮ่องเต้ครับ\nTwitter: piyachetkk\nWebsite: https://www.buffalolarity.com/");
                 }
@@ -144,14 +168,30 @@ class BuffBot extends Controller
         return response('OK', 200);
     }
 
-    public function getLatestInstagramPhoto($id)
+    public function getLatestInstagramImage($id)
     {
         try {
             $instagram = new Instagram();
-            $medias = $instagram->getMedias($id, 10);
+            $medias = $instagram->getMedias($id, 30);
 
             foreach ($medias as $media) {
-                if ($media->getType() != "image") {
+                if ($media->getType() != 'image' && $media->getType() != 'sidecar') {
+                    continue;
+                }
+
+                if ($media->getType() == 'sidecar')
+                {
+                    $subItems = $media->getSidecarMedias();
+
+                    foreach($subItems as $subItem)
+                    {
+                        if ($subItem->getType() != 'image' && $subItem->getType() != 'sidecar') {
+                            continue;
+                        }
+
+                        return $subItem->getImageHighResolutionUrl();
+                    }
+
                     continue;
                 }
 
@@ -166,7 +206,34 @@ class BuffBot extends Controller
         return null;
     }
 
-    private function getBNKInstagramIdFromName($name)
+    public function getLatestInstagramVideo($id)
+    {
+        try {
+            $instagram = new Instagram();
+            $medias = $instagram->getMedias($id, 30);
+
+            foreach ($medias as $media) {
+                if ($media->getType() != 'video') {
+                    continue;
+                }
+
+                return $media->getVideoStandardResolutionUrl();
+            }
+        }
+        catch(\Exception $exception)
+        {
+            //
+        }
+
+        return null;
+    }
+
+    private function startsWith($command, $match)
+    {
+        return strpos($command, $match) === 0;
+    }
+
+    public function getBNKInstagramIdFromName($name)
     {
         foreach(self::$ids as $key => $value)
         {
