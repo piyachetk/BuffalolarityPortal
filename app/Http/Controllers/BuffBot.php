@@ -143,7 +143,7 @@ class BuffBot extends Controller
                     $bot->replyText($event->getReplyToken(),"ท่านฮ่องเต้ครับ\nTwitter: piyachetkk\nWebsite: https://www.buffalolarity.com/");
                 }
                 else{
-                    $bot->replyText($event->getReplyToken(), "BuffBot สับสนครับ" . $displayName);
+                    $bot->replyText($event->getReplyToken(), "BuffBot สับสนครับ " . $displayName . "\nตอนนี้ผมรับได้แค่คำสั่งพื้นฐานบางตัวนะครับ");
                 }
             }
             else if($replyText === 'BuffBot!')
@@ -152,7 +152,7 @@ class BuffBot extends Controller
             }
             else if ($isGroup)
             {
-                $bot->replyText($event->getReplyToken(), 'BuffBot สับสนครับ');
+                $bot->replyText($event->getReplyToken(), 'BuffBot สับสนครับ' . $displayName);
             }
         }
 
