@@ -137,14 +137,16 @@ class BuffBot extends Controller
                         $id = $name;
                     }
 
-                    $videoLink = $this->getLatestInstagramVideo($id);
+                    $preview = null;
+
+                    $videoLink = $this->getLatestInstagramVideo($id, $preview);
 
                     if (is_null($videoLink) || empty($videoLink))
                     {
                         $bot->replyText($event->getReplyToken(), 'BuffBot ไม่สามารถหาวีดีโอล่าสุดได้ครับ');
                     }
 
-                    $videoMessageBuilder = new VideoMessageBuilder($videoLink, url('/img/grey.jpg'));
+                    $videoMessageBuilder = new VideoMessageBuilder($videoLink, $preview ?: '');
 
                     $bot->replyMessage($event->getReplyToken(), $videoMessageBuilder);
                 }
@@ -205,7 +207,7 @@ class BuffBot extends Controller
         return null;
     }
 
-    public function getLatestInstagramVideo($id)
+    public function getLatestInstagramVideo($id, &$preview)
     {
         try {
             $instagram = new Instagram();
@@ -218,9 +220,24 @@ class BuffBot extends Controller
 
                 $link = $media->getLink();
                 $json_media_by_url = $instagram->getMediaByUrl($link);
-                $video_url = $json_media_by_url['videoStandardResolutionUrl'];
+                $highRes = $json_media_by_url['videoStandardResolutionUrl'];
+                $stdRes = $json_media_by_url['videoLowResolutionUrl'];
+                $lowRes = $json_media_by_url['videoLowBandwidthUrl'];
 
-                return $video_url;
+                $preview = $media->getImageHighResolutionUrl();
+
+                if (!empty($highRes) && !is_null($highRes))
+                {
+                    return $highRes;
+                }
+                else if (!empty($stdRes) && !is_null($stdRes))
+                {
+                    return $stdRes;
+                }
+                else if (!empty($lowRes) && !is_null($lowRes))
+                {
+                    return $lowRes;
+                }
             }
         }
         catch(\Exception $exception)
