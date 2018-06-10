@@ -144,7 +144,7 @@ class BuffBot extends Controller
                         $bot->replyText($event->getReplyToken(), 'BuffBot ไม่สามารถหาวีดีโอล่าสุดได้ครับ');
                     }
 
-                    $videoMessageBuilder = new VideoMessageBuilder($videoLink, '');
+                    $videoMessageBuilder = new VideoMessageBuilder($videoLink, url('/img/grey.jpg'));
 
                     $bot->replyMessage($event->getReplyToken(), $videoMessageBuilder);
                 }
