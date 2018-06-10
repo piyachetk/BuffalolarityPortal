@@ -217,7 +217,22 @@ class BuffBot extends Controller
                     continue;
                 }
 
-                return $media->getVideoStandardResolutionUrl();
+                $standardRes = $media->getVideoStandardResolutionUrl();
+                $lowRes = $media->getVideoLowResolutionUrl();
+                $lowBandwidth = $media->getVideoLowBandwidthUrl();
+
+                if (!empty($standardRes) && !is_null($standardRes))
+                {
+                    return $standardRes;
+                }
+                else if (!empty($lowRes) && !is_null($lowRes))
+                {
+                    return $lowRes;
+                }
+                else if (!empty($lowBandwidth) && !is_null($lowBandwidth))
+                {
+                    return $lowBandwidth;
+                }
             }
         }
         catch(\Exception $exception)
