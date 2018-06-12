@@ -162,7 +162,7 @@ class BuffBot extends Controller
     public function getLatestInstagramImage($id)
     {
         try {
-            $instagram = Instagram::withCredentials(env('ig_id'), env('ig_pass'));
+            $instagram = Instagram::withCredentials(env('IG_ID'), env('IG_PASS'));
             $instagram->login();
             $medias = $instagram->getMedias($id, 30);
 
