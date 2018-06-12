@@ -163,6 +163,7 @@ class BuffBot extends Controller
     {
         try {
             $instagram = Instagram::withCredentials(env('ig_id'), env('ig_pass'));
+            $instagram->login();
             $medias = $instagram->getMedias($id, 30);
 
             foreach ($medias as $media) {
