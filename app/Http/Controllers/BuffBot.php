@@ -11,7 +11,6 @@ use \LINE\LINEBot\Event\MessageEvent\TextMessage;
 use \LINE\LINEBot\Exception\InvalidEventRequestException;
 use \LINE\LINEBot\Exception\InvalidSignatureException;
 use Illuminate\Support\Facades\Log;
-use \InstagramScraper\Instagram;
 use LINE\LINEBot\MessageBuilder\ImageMessageBuilder;
 use LINE\LINEBot\MessageBuilder\VideoMessageBuilder;
 
@@ -45,277 +44,23 @@ class BuffBot extends Controller
 
             $replyText = $event->getText();
 
-            if (strpos($replyText, 'BuffBot! ') === 0)
-            {
-                $id = $event->getUserId();
-                $userProfile = $bot->getProfile($id);
+            $id = $event->getUserId();
+            $userProfile = $bot->getProfile($id);
 
-                if ($userProfile->isSucceeded()) {
-                    $profile = $userProfile->getJSONDecodedBody();
-                    $displayName = $profile['displayName'];
-                }
-                else{
-                    $displayName = 'ท่านผู้ใช้';
-                }
-
-                $command = substr($replyText, 9);
-
-                if ($this->startsWith($command, 'ขอรูปล่าสุดในไอจีของ') || $this->startsWith($command, 'ขอภาพล่าสุดในไอจีของ'))
-                {
-                    $name = trim(substr($command, strlen('ขอรูปล่าสุดในไอจีของ')));
-
-                    $id = $this->getInstagramIdFromAlias($name);
-
-                    if ($id == '')
-                    {
-                        $id = $name;
-                    }
-
-                    $imageLink = $this->getLatestInstagramImage($id);
-
-                    if (is_null($imageLink) || empty($imageLink))
-                    {
-                        $bot->replyText($event->getReplyToken(), 'BuffBot ไม่สามารถหารูปล่าสุดได้ครับ');
-                    }
-
-                    $imageMessageBuilder = new ImageMessageBuilder($imageLink, $imageLink);
-
-                    $bot->replyMessage($event->getReplyToken(), $imageMessageBuilder);
-                }
-                else if ($this->startsWith($command, 'ขอวีดีโอล่าสุดในไอจีของ'))
-                {
-                    $name = trim(substr($command, strlen('ขอวีดีโอล่าสุดในไอจีของ')));
-
-                    $id = $this->getInstagramIdFromAlias($name);
-
-                    if ($id == '')
-                    {
-                        $id = $name;
-                    }
-
-                    $preview = null;
-
-                    $videoLink = $this->getLatestInstagramVideo($id, $preview);
-
-                    if (is_null($videoLink) || empty($videoLink))
-                    {
-                        $bot->replyText($event->getReplyToken(), 'BuffBot ไม่สามารถหาวีดีโอล่าสุดได้ครับ');
-                    }
-
-                    $videoMessageBuilder = new VideoMessageBuilder($videoLink, $preview ?: '');
-
-                    $bot->replyMessage($event->getReplyToken(), $videoMessageBuilder);
-                }
-                else if ($this->startsWith($command, 'ขอรูปในไอจีจากลิงค์') || $this->startsWith($command, 'ขอภาพในไอจีจากลิงค์'))
-                {
-                    $link = trim(substr($command, strlen('ขอรูปในไอจีจากลิงค์')));
-
-                    $imageLink = $this->getInstagramImageViaLink($link);
-
-                    if (is_null($imageLink) || empty($imageLink))
-                    {
-                        $bot->replyText($event->getReplyToken(), 'BuffBot ไม่สามารถหารูปจากลิงค์ได้ครับ');
-                    }
-
-                    $imageMessageBuilder = new ImageMessageBuilder($imageLink, $imageLink);
-
-                    $bot->replyMessage($event->getReplyToken(), $imageMessageBuilder);
-                }
-                else if ($this->startsWith($command, 'ขอวีดีโอในไอจีจากลิงค์'))
-                {
-                    $link = trim(substr($command, strlen('ขอวีดีโอในไอจีจากลิงค์')));
-
-                    $preview = null;
-
-                    $videoLink = $this->getInstagramVideoViaLink($link, $preview);
-
-                    if (is_null($videoLink) || empty($videoLink))
-                    {
-                        $bot->replyText($event->getReplyToken(), 'BuffBot ไม่สามารถหาวีดีโอจากลิงค์ได้ครับ');
-                    }
-
-                    $videoMessageBuilder = new VideoMessageBuilder($videoLink, $preview ?: '');
-
-                    $bot->replyMessage($event->getReplyToken(), $videoMessageBuilder);
-                }
-                else if($this->startsWith($command, 'ใครสร้างนายขึ้นมา'))
-                {
-                    $bot->replyText($event->getReplyToken(),"ท่านฮ่องเต้ครับ\nTwitter: piyachetkk\nWebsite: https://www.buffalolarity.com/");
-                }
-                else{
-                    $bot->replyText($event->getReplyToken(), "BuffBot สับสนครับ " . $displayName . "\nตอนนี้ผมรับได้แค่คำสั่งพื้นฐานบางตัวนะครับ");
-                }
+            if ($userProfile->isSucceeded()) {
+                $profile = $userProfile->getJSONDecodedBody();
+                $displayName = $profile['displayName'];
             }
-            else if($replyText === 'BuffBot!')
-            {
-                $bot->replyText($event->getReplyToken(), 'ครับผม BuffBot ยินดีรับใช้ครับ');
+            else{
+                $displayName = 'ท่านผู้ใช้';
             }
-            else if ($isGroup)
+
+            if (!$isGroup)
             {
-                $bot->replyText($event->getReplyToken(), 'BuffBot สับสนครับ' . $displayName);
+                $bot->replyText($event->getReplyToken(), 'BuffBot กำลังปรับปรุงอยู่ครับ ' . $displayName);
             }
         }
 
         return response('OK', 200);
-    }
-
-    public function getLatestInstagramImage($id)
-    {
-        try {
-            $instagram = Instagram::withCredentials(env('IG_ID'), env('IG_PASS'));
-            $instagram->login();
-            $medias = $instagram->getMedias($id, 30);
-
-            foreach ($medias as $media) {
-                if ($media->getType() != 'image' && $media->getType() != 'sidecar') {
-                    continue;
-                }
-
-                $highRes = $media->getImageHighResolutionUrl();
-                $stdRes = $media->getImageStandardResolutionUrl();
-                $lowRes = $media->getImageLowResolutionUrl();
-
-                if (!empty($highRes) && !is_null($highRes))
-                {
-                    return $highRes;
-                }
-                else if (!empty($stdRes) && !is_null($stdRes))
-                {
-                    return $stdRes;
-                }
-                else if (!empty($lowRes) && !is_null($lowRes))
-                {
-                    return $lowRes;
-                }
-            }
-        }
-        catch(\Exception $exception)
-        {
-            //
-        }
-
-        return null;
-    }
-
-    public function getLatestInstagramVideo($id, &$preview)
-    {
-        try {
-            $instagram = new Instagram();
-            $medias = $instagram->getMedias($id, 30);
-
-            foreach ($medias as $media) {
-                if ($media->getType() != 'video') {
-                    continue;
-                }
-
-                $link = $media->getLink();
-                $json_media_by_url = $instagram->getMediaByUrl($link);
-                $highRes = $json_media_by_url['videoStandardResolutionUrl'];
-                $stdRes = $json_media_by_url['videoLowResolutionUrl'];
-                $lowRes = $json_media_by_url['videoLowBandwidthUrl'];
-
-                $preview = $media->getImageHighResolutionUrl();
-
-                if (!empty($highRes) && !is_null($highRes))
-                {
-                    return $highRes;
-                }
-                else if (!empty($stdRes) && !is_null($stdRes))
-                {
-                    return $stdRes;
-                }
-                else if (!empty($lowRes) && !is_null($lowRes))
-                {
-                    return $lowRes;
-                }
-            }
-        }
-        catch(\Exception $exception)
-        {
-            //
-        }
-
-        return null;
-    }
-
-    public function getInstagramImageViaLink($link)
-    {
-        try {
-            $instagram = new Instagram();
-            $json_media_by_url = $instagram->getMediaByUrl($link);
-
-            $highRes = $json_media_by_url['imageHighResolutionUrl'];
-            $stdRes = $json_media_by_url['imageStandardResolutionUrl'];
-            $lowRes = $json_media_by_url['imageLowResolutionUrl'];
-
-            if (!empty($highRes) && !is_null($highRes))
-            {
-                return $highRes;
-            }
-            else if (!empty($stdRes) && !is_null($stdRes))
-            {
-                return $stdRes;
-            }
-            else if (!empty($lowRes) && !is_null($lowRes))
-            {
-                return $lowRes;
-            }
-        }
-        catch(\Exception $exception)
-        {
-            //
-        }
-
-        return null;
-    }
-
-    public function getInstagramVideoViaLink($link, &$preview)
-    {
-        try {
-            $instagram = new Instagram();
-            $json_media_by_url = $instagram->getMediaByUrl($link);
-            $highRes = $json_media_by_url['videoStandardResolutionUrl'];
-            $stdRes = $json_media_by_url['videoLowResolutionUrl'];
-            $lowRes = $json_media_by_url['videoLowBandwidthUrl'];
-
-            $preview = $json_media_by_url['imageHighResolutionUrl'];
-
-            if (!empty($highRes) && !is_null($highRes))
-            {
-                return $highRes;
-            }
-            else if (!empty($stdRes) && !is_null($stdRes))
-            {
-                return $stdRes;
-            }
-            else if (!empty($lowRes) && !is_null($lowRes))
-            {
-                return $lowRes;
-            }
-        }
-        catch(\Exception $exception)
-        {
-            //
-        }
-
-        return null;
-    }
-
-    private function startsWith($command, $match)
-    {
-        return strpos($command, $match) === 0;
-    }
-
-    public function getInstagramIdFromAlias($name)
-    {
-        foreach(Alias::all() as $alias)
-        {
-            if ($alias->alias == $name)
-            {
-                return $alias->id;
-            }
-        }
-
-        return '';
     }
 }
