@@ -17,16 +17,6 @@ use Mockery\Exception;
 
 class BuffBot extends Controller
 {
-    public function httpGet($url)
-    {
-        $ch = curl_init($url); // such as http://example.com/example.xml
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_close($ch);
-
-        return curl_exec($ch);
-    }
-
     protected function processMessage(Request $request){
         $signature = $request->header('X-Line-Signature');
         if (!isset($signature) || is_null($signature)) {
@@ -67,7 +57,7 @@ class BuffBot extends Controller
             if ($event->isUserEvent())
             {
                 try {
-                    $response = self::httpGet('https://chatbot.buffalolarity.com/get?msg=' . $replyText);
+                    $response = file_get_contents('https://chatbot.buffalolarity.com/get?msg=' . $replyText);
 
                     if (is_null($response) || empty($response)) {
                         $bot->replyText($event->getReplyToken(), 'BuffBot กำลังปรับปรุงระบบอยู่ครับ สามารถติดต่อท่านฮ่องเต้เพื่อสอบถามข้อมูลเพิ่มเติมได้');
