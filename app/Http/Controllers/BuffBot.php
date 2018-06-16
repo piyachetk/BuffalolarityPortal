@@ -13,9 +13,20 @@ use \LINE\LINEBot\Exception\InvalidSignatureException;
 use Illuminate\Support\Facades\Log;
 use LINE\LINEBot\MessageBuilder\ImageMessageBuilder;
 use LINE\LINEBot\MessageBuilder\VideoMessageBuilder;
+use Mockery\Exception;
 
 class BuffBot extends Controller
 {
+    public function httpGet($url)
+    {
+        $ch = curl_init($url); // such as http://example.com/example.xml
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_close($ch);
+
+        return curl_exec($ch);
+    }
+
     protected function processMessage(Request $request){
         $signature = $request->header('X-Line-Signature');
         if (!isset($signature) || is_null($signature)) {
@@ -40,8 +51,6 @@ class BuffBot extends Controller
                 continue;
             }
 
-            $isGroup = $event->isGroupEvent();
-
             $replyText = $event->getText();
 
             $id = $event->getUserId();
@@ -55,9 +64,24 @@ class BuffBot extends Controller
                 $displayName = 'ท่านผู้ใช้';
             }
 
-            if (!$isGroup)
+            if ($event->isUserEvent())
             {
-                $bot->replyText($event->getReplyToken(), 'BuffBot กำลังปรับปรุงอยู่ครับ ' . $displayName);
+                try {
+                    $response = self::httpGet('https://chatbot.buffalolarity.com/get?msg=' . $replyText);
+
+                    if (is_null($response) || empty($response)) {
+                        $bot->replyText($event->getReplyToken(), 'BuffBot กำลังปรับปรุงระบบอยู่ครับ สามารถติดต่อท่านฮ่องเต้เพื่อสอบถามข้อมูลเพิ่มเติมได้');
+                    }
+
+                    $bot->replyText($event->getReplyToken(), $response);
+                }
+                catch(Exception $ex){
+                    $bot->replyText($event->getReplyToken(), 'BuffBot กำลังปรับปรุงระบบอยู่ครับ สามารถติดต่อท่านฮ่องเต้เพื่อสอบถามข้อมูลเพิ่มเติมได้ครับ');
+                }
+            }
+            else
+            {
+                $bot->replyText($event->getReplyToken(), 'BuffBot ยังไม่เปิดบริการให้ใช้ในแชทกลุ่มเพื่อป้องกันการนำ BuffBot ไปใช้ในการก่อความรำคาญครับ');
             }
         }
 
