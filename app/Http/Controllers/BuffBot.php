@@ -57,7 +57,7 @@ class BuffBot extends Controller
             if ($event->isUserEvent())
             {
                 try {
-                    $response = file_get_contents('https://chatbot.buffalolarity.com/get?msg=' . $replyText);
+                    $response = file_get_contents('https://chatbot.buffalolarity.com/get?msg=' . rawurlencode($replyText));
 
                     if (is_null($response) || empty($response)) {
                         $bot->replyText($event->getReplyToken(), 'BuffBot กำลังปรับปรุงระบบอยู่ครับ สามารถติดต่อท่านฮ่องเต้เพื่อสอบถามข้อมูลเพิ่มเติมได้');
