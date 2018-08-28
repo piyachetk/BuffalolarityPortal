@@ -141,7 +141,7 @@ class BuffBot extends Controller
                 }
                 else if($this->startsWith($command, 'ขอวาร์ปเด็ดๆ'))
                 {
-                    $warp = Alias::where('isWarp', true)->orderBy(DB::raw('RAND()'))->get();
+                    $warp = Alias::where('isWarp', true)->orderBy(DB::raw('RAND()'))->first();
 
                     $imageLink = $this->getLatestInstagramImage($warp->id);
 
