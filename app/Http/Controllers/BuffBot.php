@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use \App\Alias;
 use \Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use \LINE\LINEBot;
 use \LINE\LINEBot\HTTPClient\CurlHTTPClient;
 use \LINE\LINEBot\Event\MessageEvent;
@@ -138,6 +139,21 @@ class BuffBot extends Controller
 
                     $bot->replyMessage($event->getReplyToken(), $videoMessageBuilder);
                 }
+                else if($this->startsWith($command, 'ขอวาร์ปเด็ดๆ'))
+                {
+                    $warp = Alias::where('isWarp', true)->orderBy(DB::raw('RAND()'))->get();
+
+                    $imageLink = $this->getLatestInstagramImage($warp->id);
+
+                    if (is_null($imageLink) || empty($imageLink))
+                    {
+                        $bot->replyText($event->getReplyToken(), 'BuffBot ไม่สามารถหารูปล่าสุดได้ครับ');
+                    }
+
+                    $imageMessageBuilder = new ImageMessageBuilder($imageLink, $imageLink);
+
+                    $bot->replyMessage($event->getReplyToken(), $imageMessageBuilder);
+                }
                 else if($this->startsWith($command, 'ใครสร้างนายขึ้นมา'))
                 {
                     $bot->replyText($event->getReplyToken(),"ท่านฮ่องเต้ครับ\nTwitter: piyachetkk\nWebsite: https://www.buffalolarity.com/");
@@ -162,8 +178,7 @@ class BuffBot extends Controller
     public function getLatestInstagramImage($id)
     {
         try {
-            $instagram = Instagram::withCredentials(env('IG_ID'), env('IG_PASS'));
-            $instagram->login();
+            $instagram = new Instagram();
             $medias = $instagram->getMedias($id, 30);
 
             foreach ($medias as $media) {

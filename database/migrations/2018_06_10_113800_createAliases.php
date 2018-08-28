@@ -16,6 +16,7 @@ class CreateAliases extends Migration
         Schema::create('aliases', function (Blueprint $table) {
             $table->string('alias');
             $table->string('id');
+            $table->boolean('isWarp');
             $table->primary('alias');
         });
     }
