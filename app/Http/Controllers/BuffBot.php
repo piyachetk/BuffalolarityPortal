@@ -143,7 +143,7 @@ class BuffBot extends Controller
                 {
                     $warp = Alias::where('isWarp', true)->orderBy(DB::raw('RAND()'))->first();
 
-                    $imageLink = $this->getLatestInstagramImage($warp->id);
+                    $imageLink = $this->getRandomInstagramImage($warp->id);
 
                     if (is_null($imageLink) || empty($imageLink))
                     {
@@ -332,5 +332,45 @@ class BuffBot extends Controller
         }
 
         return '';
+    }
+
+    public function getRandomInstagramImage($id)
+    {
+        try {
+            $instagram = new Instagram();
+            $medias = $instagram->getMedias($id, 1000);
+
+            $randomIndex = rand(0, 999);
+
+            while(empty($medias[$randomIndex]) || is_null($medias[$randomIndex]) || ($medias[$randomIndex]->getType() != 'image' && $medias[$randomIndex]->getType() != 'sidecar'))
+            {
+                $randomIndex = rand(0, 999);
+            }
+
+            $media = $medias[$randomIndex];
+
+            $highRes = $media->getImageHighResolutionUrl();
+            $stdRes = $media->getImageStandardResolutionUrl();
+            $lowRes = $media->getImageLowResolutionUrl();
+
+            if (!empty($highRes) && !is_null($highRes))
+            {
+                return $highRes;
+            }
+            else if (!empty($stdRes) && !is_null($stdRes))
+            {
+                return $stdRes;
+            }
+            else if (!empty($lowRes) && !is_null($lowRes))
+            {
+                return $lowRes;
+            }
+        }
+        catch(\Exception $exception)
+        {
+            //
+        }
+
+        return null;
     }
 }
