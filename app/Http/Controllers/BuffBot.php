@@ -268,7 +268,7 @@ class BuffBot extends Controller
                 $stdRes = $json_media_by_url['videoLowResolutionUrl'];
                 $lowRes = $json_media_by_url['videoLowBandwidthUrl'];
 
-                $caption = $json_media_by_url['caption']['text'];
+                $caption = $media->getCaption();
 
                 $preview = $media->getImageHighResolutionUrl();
 
@@ -304,7 +304,7 @@ class BuffBot extends Controller
             $stdRes = $json_media_by_url['imageStandardResolutionUrl'];
             $lowRes = $json_media_by_url['imageLowResolutionUrl'];
 
-            $caption = $json_media_by_url['caption']['text'];
+            $caption = $json_media_by_url->getCaption();
 
             if (!empty($highRes) && !is_null($highRes))
             {
@@ -338,7 +338,7 @@ class BuffBot extends Controller
 
             $preview = $json_media_by_url['imageHighResolutionUrl'];
 
-            $caption = $json_media_by_url['caption']['text'];
+            $caption = $json_media_by_url->getCaption();
 
             if (!empty($highRes) && !is_null($highRes))
             {
