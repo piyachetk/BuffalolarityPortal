@@ -72,16 +72,23 @@ class BuffBot extends Controller
                         $id = $name;
                     }
 
-                    $imageLink = $this->getLatestInstagramImage($id);
+                    $caption = "";
+
+                    $imageLink = $this->getLatestInstagramImage($id, $caption);
 
                     if (is_null($imageLink) || empty($imageLink))
                     {
                         $bot->replyText($event->getReplyToken(), 'BuffBot ไม่สามารถหารูปล่าสุดได้ครับ');
                     }
 
-                    $imageMessageBuilder = new ImageMessageBuilder($imageLink, $imageLink);
+                    $multiMessageBuilder = new LINEBot\MessageBuilder\MultiMessageBuilder();
 
-                    $bot->replyMessage($event->getReplyToken(), $imageMessageBuilder);
+                    $multiMessageBuilder->add(new ImageMessageBuilder($imageLink, $imageLink ?: ""));
+
+                    if (!empty($caption) && !is_null($caption))
+                        $multiMessageBuilder->add(new LINEBot\MessageBuilder\TextMessageBuilder("\"" . $caption . "\""));
+
+                    $bot->replyMessage($event->getReplyToken(), $multiMessageBuilder);
                 }
                 else if ($this->startsWith($command, 'ขอวีดีโอล่าสุดในไอจีของ'))
                 {
@@ -95,68 +102,96 @@ class BuffBot extends Controller
                     }
 
                     $preview = null;
+                    $caption = null;
 
-                    $videoLink = $this->getLatestInstagramVideo($id, $preview);
+                    $videoLink = $this->getLatestInstagramVideo($id, $preview, $caption);
 
                     if (is_null($videoLink) || empty($videoLink))
                     {
                         $bot->replyText($event->getReplyToken(), 'BuffBot ไม่สามารถหาวีดีโอล่าสุดได้ครับ');
                     }
 
-                    $videoMessageBuilder = new VideoMessageBuilder($videoLink, $preview ?: '');
+                    $multiMessageBuilder = new LINEBot\MessageBuilder\MultiMessageBuilder();
 
-                    $bot->replyMessage($event->getReplyToken(), $videoMessageBuilder);
+                    $multiMessageBuilder->add(new VideoMessageBuilder($videoLink, $preview ?: ""));
+
+                    if (!empty($caption) && !is_null($caption))
+                        $multiMessageBuilder->add(new LINEBot\MessageBuilder\TextMessageBuilder("\"" . $caption . "\""));
+
+                    $bot->replyMessage($event->getReplyToken(), $multiMessageBuilder);
                 }
                 else if ($this->startsWith($command, 'ขอรูปในไอจีจากลิงค์') || $this->startsWith($command, 'ขอภาพในไอจีจากลิงค์'))
                 {
                     $link = trim(substr($command, strlen('ขอรูปในไอจีจากลิงค์')));
 
-                    $imageLink = $this->getInstagramImageViaLink($link);
+                    $caption = null;
+
+                    $imageLink = $this->getInstagramImageViaLink($link, $caption);
 
                     if (is_null($imageLink) || empty($imageLink))
                     {
                         $bot->replyText($event->getReplyToken(), 'BuffBot ไม่สามารถหารูปจากลิงค์ได้ครับ');
                     }
 
-                    $imageMessageBuilder = new ImageMessageBuilder($imageLink, $imageLink);
+                    $multiMessageBuilder = new LINEBot\MessageBuilder\MultiMessageBuilder();
 
-                    $bot->replyMessage($event->getReplyToken(), $imageMessageBuilder);
+                    $multiMessageBuilder->add(new ImageMessageBuilder($imageLink, $imageLink ?: ""));
+
+                    if (!empty($caption) && !is_null($caption))
+                        $multiMessageBuilder->add(new LINEBot\MessageBuilder\TextMessageBuilder("\"" . $caption . "\""));
+
+                    $bot->replyMessage($event->getReplyToken(), $multiMessageBuilder);
                 }
                 else if ($this->startsWith($command, 'ขอวีดีโอในไอจีจากลิงค์'))
                 {
                     $link = trim(substr($command, strlen('ขอวีดีโอในไอจีจากลิงค์')));
 
                     $preview = null;
+                    $caption = null;
 
-                    $videoLink = $this->getInstagramVideoViaLink($link, $preview);
+                    $videoLink = $this->getInstagramVideoViaLink($link, $preview, $caption);
 
                     if (is_null($videoLink) || empty($videoLink))
                     {
                         $bot->replyText($event->getReplyToken(), 'BuffBot ไม่สามารถหาวีดีโอจากลิงค์ได้ครับ');
                     }
 
-                    $videoMessageBuilder = new VideoMessageBuilder($videoLink, $preview ?: '');
+                    $multiMessageBuilder = new LINEBot\MessageBuilder\MultiMessageBuilder();
 
-                    $bot->replyMessage($event->getReplyToken(), $videoMessageBuilder);
+                    $multiMessageBuilder->add(new VideoMessageBuilder($videoLink, $preview ?:  ""));
+
+                    if (!empty($caption) && !is_null($caption))
+                        $multiMessageBuilder->add(new LINEBot\MessageBuilder\TextMessageBuilder("\"" . $caption . "\""));
+
+                    $bot->replyMessage($event->getReplyToken(), $multiMessageBuilder);
                 }
                 else if($this->startsWith($command, 'ขอวาร์ปเด็ดๆ'))
                 {
                     $warp = Alias::where('isWarp', true)->orderBy(DB::raw('RAND()'))->first();
 
+                    $caption = null;
+
                     $imageLink = $this->getRandomInstagramImage($warp->id);
 
                     if (is_null($imageLink) || empty($imageLink))
                     {
-                        $bot->replyText($event->getReplyToken(), 'BuffBot ไม่สามารถหารูปล่าสุดได้ครับ');
+                        $bot->replyText($event->getReplyToken(), 'BuffBot ไม่สามารถหาวาร์ปเด็ดๆได้ครับ');
                     }
 
-                    $imageMessageBuilder = new ImageMessageBuilder($imageLink, $imageLink);
+                    $multiMessageBuilder = new LINEBot\MessageBuilder\MultiMessageBuilder();
 
-                    $bot->replyMessage($event->getReplyToken(), $imageMessageBuilder);
+                    $multiMessageBuilder->add(new ImageMessageBuilder($imageLink, $imageLink));
+
+                    if (empty($caption) || is_null($caption))
+                        $multiMessageBuilder->add(new LINEBot\MessageBuilder\TextMessageBuilder("IG: " . $id));
+                    else
+                        $multiMessageBuilder->add(new LINEBot\MessageBuilder\TextMessageBuilder($id . ": \"" . $caption . "\""));
+
+                    $bot->replyMessage($event->getReplyToken(), $multiMessageBuilder);
                 }
                 else if($this->startsWith($command, 'ใครสร้างนายขึ้นมา'))
                 {
-                    $bot->replyText($event->getReplyToken(),"ท่านฮ่องเต้ครับ\nTwitter: piyachetkk\nWebsite: https://www.buffalolarity.com/");
+                    $bot->replyText($event->getReplyToken(),"ท่านฮ่องเต้ครับ\nWebsite: https://www.hongtae.net/");
                 }
                 else{
                     $bot->replyText($event->getReplyToken(), "BuffBot สับสนครับ " . $displayName . "\nตอนนี้ผมรับได้แค่คำสั่งพื้นฐานบางตัวนะครับ");
@@ -175,7 +210,7 @@ class BuffBot extends Controller
         return response('OK', 200);
     }
 
-    public function getLatestInstagramImage($id)
+    public function getLatestInstagramImage($id, &$caption)
     {
         try {
             $instagram = new Instagram();
@@ -189,6 +224,10 @@ class BuffBot extends Controller
                 $highRes = $media->getImageHighResolutionUrl();
                 $stdRes = $media->getImageStandardResolutionUrl();
                 $lowRes = $media->getImageLowResolutionUrl();
+
+                $link = $media->getLink();
+                $json_media_by_url = $instagram->getMediaByUrl($link);
+                $caption = $json_media_by_url['caption']['text'];
 
                 if (!empty($highRes) && !is_null($highRes))
                 {
@@ -212,7 +251,7 @@ class BuffBot extends Controller
         return null;
     }
 
-    public function getLatestInstagramVideo($id, &$preview)
+    public function getLatestInstagramVideo($id, &$preview, &$caption)
     {
         try {
             $instagram = new Instagram();
@@ -228,6 +267,8 @@ class BuffBot extends Controller
                 $highRes = $json_media_by_url['videoStandardResolutionUrl'];
                 $stdRes = $json_media_by_url['videoLowResolutionUrl'];
                 $lowRes = $json_media_by_url['videoLowBandwidthUrl'];
+
+                $caption = $json_media_by_url['caption']['text'];
 
                 $preview = $media->getImageHighResolutionUrl();
 
@@ -253,7 +294,7 @@ class BuffBot extends Controller
         return null;
     }
 
-    public function getInstagramImageViaLink($link)
+    public function getInstagramImageViaLink($link, &$caption)
     {
         try {
             $instagram = new Instagram();
@@ -262,6 +303,8 @@ class BuffBot extends Controller
             $highRes = $json_media_by_url['imageHighResolutionUrl'];
             $stdRes = $json_media_by_url['imageStandardResolutionUrl'];
             $lowRes = $json_media_by_url['imageLowResolutionUrl'];
+
+            $caption = $json_media_by_url['caption']['text'];
 
             if (!empty($highRes) && !is_null($highRes))
             {
@@ -284,7 +327,7 @@ class BuffBot extends Controller
         return null;
     }
 
-    public function getInstagramVideoViaLink($link, &$preview)
+    public function getInstagramVideoViaLink($link, &$preview, &$caption)
     {
         try {
             $instagram = new Instagram();
@@ -294,6 +337,8 @@ class BuffBot extends Controller
             $lowRes = $json_media_by_url['videoLowBandwidthUrl'];
 
             $preview = $json_media_by_url['imageHighResolutionUrl'];
+
+            $caption = $json_media_by_url['caption']['text'];
 
             if (!empty($highRes) && !is_null($highRes))
             {
@@ -344,7 +389,7 @@ class BuffBot extends Controller
 
             while(empty($medias[$randomIndex]) || is_null($medias[$randomIndex]) || ($medias[$randomIndex]->getType() != 'image' && $medias[$randomIndex]->getType() != 'sidecar'))
             {
-                $randomIndex = rand(0, 999);
+                $randomIndex = rand(0, $randomIndex);
             }
 
             $media = $medias[$randomIndex];
