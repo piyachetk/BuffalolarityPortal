@@ -171,7 +171,7 @@ class BuffBot extends Controller
 
                     $caption = null;
 
-                    $imageLink = $this->getRandomInstagramImage($warp->id);
+                    $imageLink = $this->getRandomInstagramImage($warp->id, $caption);
 
                     if (is_null($imageLink) || empty($imageLink))
                     {
@@ -182,10 +182,10 @@ class BuffBot extends Controller
 
                     $multiMessageBuilder->add(new ImageMessageBuilder($imageLink, $imageLink));
 
-                    if (empty($caption) || is_null($caption))
-                        $multiMessageBuilder->add(new LINEBot\MessageBuilder\TextMessageBuilder("IG: " . $warp->id));
-                    else
-                        $multiMessageBuilder->add(new LINEBot\MessageBuilder\TextMessageBuilder($warp->id . ": \"" . $caption . "\""));
+                    if (!empty($caption) && !is_null($caption))
+                        $multiMessageBuilder->add(new LINEBot\MessageBuilder\TextMessageBuilder("\"" . $caption . "\""));
+
+                    $multiMessageBuilder->add(new LINEBot\MessageBuilder\TextMessageBuilder("IG: " . $warp->id));
 
                     $bot->replyMessage($event->getReplyToken(), $multiMessageBuilder);
                 }
@@ -379,7 +379,7 @@ class BuffBot extends Controller
         return '';
     }
 
-    public function getRandomInstagramImage($id)
+    public function getRandomInstagramImage($id, &$caption)
     {
         try {
             $instagram = new Instagram();
@@ -397,6 +397,8 @@ class BuffBot extends Controller
             $highRes = $media->getImageHighResolutionUrl();
             $stdRes = $media->getImageStandardResolutionUrl();
             $lowRes = $media->getImageLowResolutionUrl();
+
+            $caption = $media->getCaption();
 
             if (!empty($highRes) && !is_null($highRes))
             {
