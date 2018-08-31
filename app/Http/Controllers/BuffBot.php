@@ -183,9 +183,9 @@ class BuffBot extends Controller
                     $multiMessageBuilder->add(new ImageMessageBuilder($imageLink, $imageLink));
 
                     if (empty($caption) || is_null($caption))
-                        $multiMessageBuilder->add(new LINEBot\MessageBuilder\TextMessageBuilder("IG: " . $warp));
+                        $multiMessageBuilder->add(new LINEBot\MessageBuilder\TextMessageBuilder("IG: " . $warp->id));
                     else
-                        $multiMessageBuilder->add(new LINEBot\MessageBuilder\TextMessageBuilder($id . ": \"" . $caption . "\""));
+                        $multiMessageBuilder->add(new LINEBot\MessageBuilder\TextMessageBuilder($warp->id . ": \"" . $caption . "\""));
 
                     $bot->replyMessage($event->getReplyToken(), $multiMessageBuilder);
                 }
@@ -227,7 +227,7 @@ class BuffBot extends Controller
 
                 $link = $media->getLink();
                 $json_media_by_url = $instagram->getMediaByUrl($link);
-                $caption = $json_media_by_url['caption']['text'];
+                $caption = $media->getCaption();
 
                 if (!empty($highRes) && !is_null($highRes))
                 {
