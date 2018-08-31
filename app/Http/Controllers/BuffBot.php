@@ -72,7 +72,7 @@ class BuffBot extends Controller
                         $id = $name;
                     }
 
-                    $caption = "";
+                    $caption = null;
 
                     $imageLink = $this->getLatestInstagramImage($id, $caption);
 
@@ -183,7 +183,7 @@ class BuffBot extends Controller
                     $multiMessageBuilder->add(new ImageMessageBuilder($imageLink, $imageLink));
 
                     if (empty($caption) || is_null($caption))
-                        $multiMessageBuilder->add(new LINEBot\MessageBuilder\TextMessageBuilder("IG: " . $id));
+                        $multiMessageBuilder->add(new LINEBot\MessageBuilder\TextMessageBuilder("IG: " . $warp));
                     else
                         $multiMessageBuilder->add(new LINEBot\MessageBuilder\TextMessageBuilder($id . ": \"" . $caption . "\""));
 
